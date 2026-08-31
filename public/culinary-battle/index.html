@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Кулинарная битва — игра для практики китайских иероглифов через рецепты и ингредиенты." />
+    <meta name="theme-color" content="#8f1d25" />
+    <title>Кулинарная битва · 汉字厨房</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Noto+Sans:wght@400;600;700;800;900&amp;family=Noto+Serif:wght@600;700;800;900&amp;family=Noto+Serif+SC:wght@600;700;900&amp;display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=20260830-5" />
+    <script src="game.js?v=20260830-5" defer></script>
+  </head>
+  <body>
+    <div class="paper-noise" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <button class="brand" id="home-button" type="button" aria-label="Вернуться на приветственный экран">
+        <span class="brand-seal">食</span>
+        <span><strong>Кулинарная битва</strong><small>汉字厨房</small></span>
+      </button>
+      <div class="topbar-actions">
+        <button class="header-action" id="menu-button" type="button"><span lang="zh-CN">菜单</span> Меню шефа</button>
+        <div class="topbar-stats" aria-label="Результаты игры">
+          <span>Блюда <strong id="dish-progress">0 / 25</strong></span>
+          <span>Рекорд <strong id="best-score">0</strong></span>
+          <span>Серия <strong id="streak">0</strong> 🔥</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <section class="order-panel" aria-labelledby="order-title">
+        <div class="panel-label"><span id="theme-label">Мастер-класс</span><strong id="round-label">1 / 5</strong></div>
+        <div class="customer"><span class="customer-avatar" aria-hidden="true">客</span><div><span class="speech-lead">Посетитель говорит:</span><h1 id="order-title">Приготовьте блюдо</h1></div></div>
+        <div class="order-ticket">
+          <span class="ticket-pin" aria-hidden="true"></span>
+          <button class="order-collapse-button" id="order-collapse-button" type="button" aria-expanded="true" aria-label="Свернуть текст заказа"><span aria-hidden="true">−</span><span>Свернуть текст</span></button>
+          <div class="order-text" id="order-text"><p class="order-phrase" id="order-phrase" lang="zh-CN"></p><p class="order-pinyin" id="order-pinyin"></p><p class="order-translation" id="order-translation"></p></div>
+          <button class="sound-button" id="sound-button" type="button" aria-label="Прослушать заказ"><span aria-hidden="true">◖)))</span> Слушать</button>
+        </div>
+        <div class="chef-note"><span aria-hidden="true">✦</span><p><strong>Совет шефа</strong><br /><span id="chef-tip">Выберите все нужные ингредиенты. Неверные продукты исчезнут после проверки.</span></p></div>
+      </section>
+
+      <section class="kitchen-panel" aria-labelledby="ingredients-title">
+        <div class="kitchen-heading"><div><span class="eyebrow">Кухня</span><h2 id="ingredients-title">Выберите ингредиенты</h2></div><button class="mode-button" id="mode-button" type="button" aria-label="Показать правила уровня"><span aria-hidden="true">◎</span><span id="mode-label">Ученик шефа</span></button></div>
+        <div class="round-progress" aria-label="Прогресс темы"><span id="progress-bar"></span></div>
+        <div class="cooking-stage" id="cooking-stage" aria-live="polite">
+          <span class="steam steam-one" aria-hidden="true"></span><span class="steam steam-two" aria-hidden="true"></span>
+          <canvas class="vessel-image" id="vessel-image" width="260" height="260" role="img" aria-label="Кухонная посуда"></canvas><div class="wok-ingredients" id="wok-ingredients" aria-hidden="true"></div><canvas class="vessel-rim" id="vessel-rim" width="260" height="260" aria-hidden="true"></canvas><canvas class="dish-result" id="dish-result" width="300" height="300" role="img" aria-label=""></canvas>
+          <p class="wok-hint" id="wok-hint">Нажимайте на продукты — они отправятся в посуду</p>
+        </div>
+        <div class="ingredient-grid" id="ingredient-grid" aria-live="polite"></div>
+        <div class="feedback" id="feedback" aria-live="assertive"><span class="feedback-icon" aria-hidden="true"></span><p><strong>Соберите рецепт</strong><span id="selection-count">Выбрано: 0</span></p></div>
+        <div class="game-actions"><span class="unlimited-attempts">∞ Попытки не ограничены</span><button class="cook-button" id="cook-button" type="button" disabled>Готовить <span aria-hidden="true">→</span></button></div>
+      </section>
+    </main>
+
+    <div class="start-overlay" id="start-overlay">
+      <section class="welcome-shell" role="dialog" aria-modal="true" aria-label="Кухня шефа Линя — выбор уровня">
+        <div class="welcome-poster-card">
+          <img class="welcome-poster" id="welcome-image" src="assets/chef-lin-welcome.png" data-fallback="assets/Приветственный экран.png" alt="Кухня шефа Линя: три уровня мастерства и кнопка начала игры" />
+          <div class="poster-mode-choice" role="group" aria-label="Выберите сложность">
+            <button class="mode-card poster-mode-button poster-mode-one selected" type="button" data-mode="apprentice" aria-label="Ученик шефа: иероглифы, пиньинь и перевод"></button>
+            <button class="mode-card poster-mode-button poster-mode-two" type="button" data-mode="journeyman" aria-label="Знаток рецептов: иероглифы и пиньинь"></button>
+            <button class="mode-card poster-mode-button poster-mode-three" type="button" data-mode="master" aria-label="Мастер вока: только иероглифы"></button>
+          </div>
+          <button class="start-button poster-start-button" id="start-button" type="button" aria-label="Начать готовить">Начать готовить</button>
+        </div>
+        <nav class="welcome-utility-bar" aria-label="Дополнительные разделы">
+          <button class="poster-utility-button" id="welcome-menu-button" type="button"><span lang="zh-CN">菜单</span> Меню шефа</button>
+          <button class="poster-utility-button" id="achievements-button" type="button"><span lang="zh-CN">荣誉</span><span><strong>Мои достижения</strong><small id="achievement-count">0 сертификатов</small></span></button>
+          <div class="welcome-progress"><span>Изучено блюд</span><strong id="welcome-progress-text">0 из 25</strong><i><b id="welcome-progress-bar"></b></i></div>
+          <button class="poster-utility-button grand-poster-button" id="grand-chef-button" type="button" disabled><span class="grand-lock" aria-hidden="true">锁</span><span><strong>Авторская кухня</strong><small id="grand-status">Откроется после изучения всех блюд</small></span></button>
+        </nav>
+      </section>
+    </div>
+
+    <div class="instruction-overlay" id="instruction-overlay" hidden>
+      <section class="instruction-card" role="dialog" aria-modal="true" aria-labelledby="instruction-title">
+        <button class="overlay-home" data-go-home type="button">На главную</button>
+        <button class="overlay-close" id="instruction-close" type="button" aria-label="Закрыть">×</button><span class="instruction-seal" id="instruction-number">01</span><span class="eyebrow">Правила мастер-класса</span><h2 id="instruction-title">Ученик шефа</h2><p class="instruction-lead" id="instruction-lead"></p>
+        <div class="instruction-metrics"><div><strong id="instruction-recipes">5 / 8</strong><span>обычно / Шифу</span></div><div><strong id="instruction-needed">2</strong><span>ингредиента</span></div><div><strong id="instruction-options">6</strong><span>вариантов</span></div></div>
+        <ul class="instruction-rules" id="instruction-rules"></ul>
+        <fieldset class="order-visibility-choice" id="order-visibility-choice">
+          <legend><span lang="zh-CN">听</span><span><strong>Как показывать заказ</strong><small>Настройка сохранится для всех блюд темы</small></span></legend>
+          <div class="visibility-options" role="group" aria-label="Вид заказа в начале игры">
+            <button class="visibility-option selected" type="button" data-order-visibility="shown" aria-pressed="true"><span class="visibility-icon" aria-hidden="true">字</span><span><strong>С текстом</strong><small>Иероглифы и доступные подсказки видны</small></span></button>
+            <button class="visibility-option" type="button" data-order-visibility="audio" aria-pressed="false"><span class="visibility-icon" aria-hidden="true">♪</span><span><strong>Только звук</strong><small>В заказе текст можно показывать и снова скрывать</small></span></button>
+          </div>
+        </fieldset>
+        <div class="instruction-actions"><button class="back-button" id="instruction-back" type="button">← Назад</button><button class="start-button" id="instruction-continue" type="button">Понятно — выбрать тему <span>→</span></button></div>
+      </section>
+    </div>
+
+    <div class="theme-overlay" id="theme-overlay" hidden>
+      <section class="theme-picker" role="dialog" aria-modal="true" aria-labelledby="theme-title">
+        <header class="theme-picker-heading"><div><span class="eyebrow">Шаг 2 · Направление</span><h2 id="theme-title">Какой мастер-класс пройдём?</h2><p>В четырёх основных направлениях — по 5 блюд, в испытании Шифу — 8.</p></div><div class="chosen-level"><small>Ваша ступень</small><strong id="chosen-level-label">Ученик шефа</strong></div></header>
+        <div class="theme-grid" role="group" aria-label="Выберите тему мастер-класса">
+          <button class="theme-card" type="button" data-theme="salads"><span class="theme-art" style="background-position:0% 0%" aria-hidden="true"></span><span class="theme-card-copy"><small>5 блюд</small><strong>Свежая композиция</strong><span>Салаты · овощи и фрукты</span></span><span class="theme-arrow" aria-hidden="true">→</span></button>
+          <button class="theme-card" type="button" data-theme="hot"><span class="theme-art" style="background-position:50% 0%" aria-hidden="true"></span><span class="theme-card-copy"><small>5 блюд</small><strong>Огонь и аромат</strong><span>Горячие блюда</span></span><span class="theme-arrow" aria-hidden="true">→</span></button>
+          <button class="theme-card" type="button" data-theme="desserts"><span class="theme-art" style="background-position:100% 0%" aria-hidden="true"></span><span class="theme-card-copy"><small>5 блюд</small><strong>Точная сладость</strong><span>Десерты и выпечка</span></span><span class="theme-arrow" aria-hidden="true">→</span></button>
+          <button class="theme-card" type="button" data-theme="drinks"><span class="theme-art" style="background-position:0% 100%" aria-hidden="true"></span><span class="theme-card-copy"><small>5 блюд</small><strong>Бар без границ</strong><span>Напитки · от смузи до чая</span></span><span class="theme-arrow" aria-hidden="true">→</span></button>
+          <button class="theme-card shifu-card" type="button" data-theme="shifu"><span class="theme-art" style="background-position:50% 100%" aria-hidden="true"></span><span class="theme-card-copy"><small>8 блюд · испытание Шифу</small><strong>Китайская кухня</strong><span>Все темы и подсказки вперемешку</span></span><span class="theme-arrow" aria-hidden="true">师</span></button>
+        </div>
+        <footer class="theme-picker-footer"><div class="footer-buttons"><button class="back-button" id="back-to-levels" type="button">← Изменить ступень</button><button class="back-button" id="theme-menu-button" type="button">Меню шефа</button><button class="back-button" data-go-home type="button">На главную</button></div><span>5 блюд в теме · 8 у Шифу · попытки не ограничены</span></footer>
+      </section>
+    </div>
+
+    <div class="result-overlay" id="result-overlay" hidden>
+      <section class="certificate-shell" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="certificate-card" id="certificate-card"><canvas class="certificate-vessel" id="certificate-vessel" width="360" height="280" aria-hidden="true"></canvas><span class="certificate-kicker"><span lang="zh-CN">汉字厨房</span><b aria-hidden="true">·</b><span>Кулинарная школа шефа Линя</span></span><span class="certificate-seal" aria-hidden="true">厨</span><p>Настоящим подтверждается, что игрок успешно завершил мастер-класс</p><h2 id="result-title">Мастер свежей композиции</h2><strong class="certificate-theme" id="certificate-theme"></strong><p id="result-copy"></p><strong class="certificate-score-label"><span>Ваши очки</span><span>мастерства</span></strong><div class="certificate-score"><span id="final-score">0</span></div><span class="certificate-signature"><canvas id="chef-signature" width="420" height="200" aria-label="Подпись шефа Линя"></canvas><small>Шеф Линь</small></span></div><div class="result-actions"><button class="back-button" id="print-certificate" type="button">Печать / PDF</button><button class="back-button" id="back-to-achievements" type="button" hidden>← К достижениям</button><button class="back-button" id="choose-theme-button" type="button">Другой класс</button><button class="start-button" id="restart-button" type="button">Повторить <span>↻</span></button><button class="back-button" data-go-home type="button">На главную</button></div></section>
+    </div>
+
+    <div class="achievements-overlay" id="achievements-overlay" hidden>
+      <section class="achievements-panel" role="dialog" aria-modal="true" aria-labelledby="achievements-title">
+        <header class="achievements-header"><div><span class="eyebrow">荣誉 · Коллекция наград</span><h2 id="achievements-title">Мои достижения</h2><p>Здесь хранятся сертификаты за завершённые мастер-классы.</p></div><button class="overlay-home" data-go-home type="button">На главную</button><button class="overlay-close" id="achievements-close" type="button" aria-label="Закрыть">×</button></header>
+        <div class="achievements-summary"><strong id="achievements-summary-count">0</strong><span>получено из 15 возможных сертификатов</span><button class="reset-progress-entry" id="reset-progress-button" type="button"><span aria-hidden="true">↺</span> Сбросить прогресс</button></div>
+        <div class="achievement-grid" id="achievement-grid"></div>
+      </section>
+    </div>
+
+    <div class="reset-overlay" id="reset-overlay" hidden>
+      <section class="reset-dialog" role="alertdialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-description">
+        <header class="reset-dialog-header"><span class="reset-seal" lang="zh-CN" aria-hidden="true">重</span><div><h2 id="reset-title">Начать обучение заново?</h2><p>Сначала убедитесь, что готовы расстаться со всеми достижениями.</p></div><button class="overlay-close reset-dialog-close" id="reset-close" type="button" aria-label="Закрыть">×</button></header>
+        <div class="reset-dialog-body">
+          <p class="reset-warning" id="reset-description">Все сертификаты, изученные блюда и лучший результат будут удалены. Это действие нельзя отменить.</p>
+          <div class="reset-effects" aria-label="Что будет удалено">
+            <div><span lang="zh-CN">菜</span><p><strong>Изученные блюда</strong><small>будут очищены</small></p></div>
+            <div><span lang="zh-CN">证</span><p><strong>Сертификаты</strong><small>исчезнут из коллекции</small></p></div>
+            <div><span lang="zh-CN">分</span><p><strong>Очки и рекорды</strong><small>вернутся к нулю</small></p></div>
+          </div>
+          <div class="reset-actions"><button class="back-button" id="reset-cancel" type="button">Оставить прогресс</button><button class="danger-button" id="reset-confirm" type="button">Сбросить всё</button></div>
+          <p class="reset-safe-note">Если вы закроете окно, весь прогресс сохранится.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="menu-overlay" id="menu-overlay" hidden>
+      <section class="chef-menu" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+        <header class="chef-menu-header"><div><span class="eyebrow">菜单 · Личный справочник</span><h2 id="menu-title">Меню шефа</h2><p>Все блюда, названия и ингредиенты мастер-класса.</p></div><div class="menu-progress"><strong id="menu-progress-text">0 из 25</strong><span>изучено</span><div><i id="menu-progress-bar"></i></div></div><button class="overlay-home" data-go-home type="button">На главную</button><button class="overlay-close" id="menu-close" type="button" aria-label="Закрыть">×</button></header>
+        <div class="menu-tools"><div class="menu-filters" id="menu-filters"></div><label class="menu-search"><span aria-hidden="true">⌕</span><input id="menu-search" type="search" placeholder="Поиск: 宫保鸡丁, gōngbǎo или курица" /></label></div>
+        <div class="menu-layout"><div class="dish-catalog" id="dish-catalog"></div><aside class="dish-detail" id="dish-detail"></aside></div>
+      </section>
+    </div>
+
+    <div class="grand-overlay" id="grand-overlay" hidden>
+      <section class="grand-kitchen" role="dialog" aria-modal="true" aria-labelledby="grand-title">
+        <header class="grand-header"><div><span class="eyebrow">Награда · Режим свободной кухни</span><h2 id="grand-title">Авторская кухня Гранд-шефа</h2><p>Выберите от 2 до 5 любых ингредиентов. Шеф Линь покажет, что из них получилось.</p></div><button class="overlay-home" data-go-home type="button">На главную</button><button class="overlay-close" id="grand-close" type="button" aria-label="Закрыть">×</button></header>
+        <div class="grand-layout"><div><div class="author-controls"><span id="author-count">Выбрано: 0 из 5</span><button class="back-button" id="author-clear" type="button">Очистить</button></div><div class="author-ingredients" id="author-ingredients"></div></div><div class="author-result-panel"><div class="author-plate" id="author-plate"><div class="author-base" id="author-base"></div><div class="author-pieces" id="author-pieces"></div><span>?</span></div><span class="eyebrow">Ваш результат</span><h3 id="author-result-title">Соберите свой рецепт</h3><p id="author-result-copy">Можно соединить любые продукты — от лапши до манго.</p><button class="start-button" id="author-cook" type="button" disabled>Создать блюдо <span>→</span></button></div></div>
+      </section>
+    </div>
+  </body>
+</html>

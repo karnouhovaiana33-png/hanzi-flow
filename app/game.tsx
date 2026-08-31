@@ -229,7 +229,7 @@ export default function Home() {
         </a>
         <nav className="game-tabs" aria-label="Игры">
           <span className="game-tab active">Пазл</span>
-          <span className="game-tab muted">Игра 02</span>
+          <a className="game-tab game-tab-link" href="./culinary-battle/">Кулинарная битва</a>
           <span className="game-tab muted">Игра 03</span>
         </nav>
         <div className="header-stat" title="Всего собрано">
